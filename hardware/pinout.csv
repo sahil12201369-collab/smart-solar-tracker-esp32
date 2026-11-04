@@ -1,0 +1,10 @@
+ESP32 pin,Connected to,Type,Notes
+GPIO34,LDR 1 (left) divider node,Analog in (ADC1),3.3V -> LDR -> GPIO34 -> 10k -> GND
+GPIO35,LDR 2 (right) divider node,Analog in (ADC1),3.3V -> LDR -> GPIO35 -> 10k -> GND
+GPIO33,Battery divider node,Analog in (ADC1),Battery+ -> 10k -> GPIO33 -> 10k -> GND
+GPIO18,SG90 servo signal (orange),PWM out,50 Hz servo pulse
+GPIO21,INA219 SDA,I2C,
+GPIO22,INA219 SCL,I2C,
+3V3,LDR dividers and INA219 VCC,Power,
+VIN (5V),SG90 servo red wire,Power,Do not power the servo from 3V3
+GND,All grounds (common),Power,Panel- charger- servo INA219 LDR and battery dividers

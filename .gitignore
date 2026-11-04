@@ -1,0 +1,14 @@
+# Private Wi-Fi details (copy of config.example.h)
+firmware/SolarTracker/config.h
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Arduino / PlatformIO build output
+build/
+.pio/
+*.bin
+*.elf

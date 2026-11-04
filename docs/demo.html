@@ -1,0 +1,78 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Solar Tracker</title>
+<style>
+body{font-family:sans-serif;background:#0f172a;color:#e2e8f0;margin:0;padding:16px;max-width:760px;margin:auto}
+h2{margin:4px 0 12px}
+.g{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.c{background:#1e293b;border-radius:10px;padding:12px;font-size:14px;color:#94a3b8}
+.c b{font-size:24px;display:block;color:#e2e8f0;margin-top:2px}
+canvas{width:100%;height:140px;background:#1e293b;border-radius:10px;margin-top:10px}
+button{padding:8px 14px;border:0;border-radius:6px;background:#38bdf8;margin-top:6px;font-weight:bold;cursor:pointer}
+input{width:100%}
+#st{font-size:13px;color:#94a3b8}
+</style></head><body>
+
+<div style="background:#facc15;color:#1e293b;padding:6px 10px;border-radius:6px;margin-bottom:10px;font:13px sans-serif">
+DEMO MODE - simulated data. The real dashboard is served by the ESP32 with live sensor values.</div>
+<script>
+(function(){
+  var angle=90, auto=true, t=0;
+  function sim(){
+    t+=1;
+    var sun=90+50*Math.sin(t/20);
+    if(auto){var d=sun-angle; if(Math.abs(d)>4) angle+=d>0?2:-2;}
+    var err=Math.abs(sun-angle);
+    var base=2200, diff=(sun-angle)*18;
+    var l=Math.max(0,Math.min(4095,Math.round(base+diff+(Math.random()*40-20))));
+    var r=Math.max(0,Math.min(4095,Math.round(base-diff+(Math.random()*40-20))));
+    var f=Math.max(0,Math.cos(err*Math.PI/180));
+    var v=5.4+0.3*f, i=240*f*f+Math.random()*4;
+    return {p:v*i,v:v,i:i,b:3.95,bp:75,l:l,r:r,a:Math.round(angle),auto:auto};
+  }
+  var realFetch=window.fetch;
+  window.fetch=function(url){
+    url=String(url);
+    if(url.indexOf('/data')===0) return Promise.resolve({json:function(){return Promise.resolve(sim());}});
+    if(url.indexOf('/set')===0){auto=false; var m=url.match(/angle=(\d+)/); if(m) angle=+m[1];}
+    if(url.indexOf('/mode')===0){auto=true;}
+    return Promise.resolve({ok:true,text:function(){return Promise.resolve('ok');}});
+  };
+})();
+</script>
+<h2>Solar Tracker Dashboard</h2>
+<div id="st">connecting...</div>
+<div class="g">
+<div class="c">Power<b id="p">-</b></div>
+<div class="c">Panel voltage<b id="v">-</b></div>
+<div class="c">Current<b id="i">-</b></div>
+<div class="c">Battery<b id="b">-</b></div>
+<div class="c">LDR left<b id="l">-</b></div>
+<div class="c">LDR right<b id="r">-</b></div>
+<div class="c">Servo angle<b id="a">-</b></div>
+<div class="c">Mode<b id="m">-</b></div>
+</div>
+<canvas id="cv" width="600" height="140"></canvas>
+<p>Manual angle (switches to MANUAL):
+<input type="range" min="20" max="160" value="90" onchange="fetch('/set?angle='+this.value)"></p>
+<button onclick="fetch('/mode?auto=1')">Back to AUTO</button>
+<script>
+const $=id=>document.getElementById(id);
+const f={p:['mW',0],v:['V',2],i:['mA',0],l:['',0],r:['',0],a:['deg',0]};
+let h=[];
+async function u(){
+ try{
+  let d=await(await fetch('/data')).json();
+  for(let k in f)$(k).textContent=d[k].toFixed(f[k][1])+' '+f[k][0];
+  $('b').textContent=d.b.toFixed(2)+' V ('+d.bp+'%)';
+  $('m').textContent=d.auto?'AUTO':'MANUAL';
+  $('st').textContent='live - updated '+new Date().toLocaleTimeString();
+  h.push(d.p);if(h.length>60)h.shift();
+  let c=$('cv'),x=c.getContext('2d'),mx=Math.max(50,...h);
+  x.clearRect(0,0,600,140);x.strokeStyle='#38bdf8';x.lineWidth=2;x.beginPath();
+  h.forEach((y,n)=>{let X=n*10,Y=130-y/mx*120;n?x.lineTo(X,Y):x.moveTo(X,Y)});
+  x.stroke();
+  x.fillStyle='#94a3b8';x.font='12px sans-serif';x.fillText('Power (mW), last 60 s, max '+mx.toFixed(0),8,14);
+ }catch(e){$('st').textContent='offline - cannot reach the ESP32'}
+}
+setInterval(u,1000);u();
+</script></body></html>

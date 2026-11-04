@@ -1,0 +1,19 @@
+Item,Component,Qty,Notes
+1,ESP32 development board,1,30-pin or 38-pin both work; use female headers on the PCB
+2,LDR (light dependent resistor),2,Left and right sensor
+3,SG90 micro servo motor,1,Powered from the 5V (VIN) pin
+4,Small solar panel 5-6 V,1,Keep output within 5-6 V
+5,INA219 current sensor module,1,Measures panel voltage / current / power (I2C)
+6,Rechargeable Li-ion battery (3.7 V),1,Use a protected cell
+7,TP4056-type charging module (with protection),1,Panel -> INA219 -> charger -> battery
+8,Resistor 10 kOhm,4,2 for LDR dividers + 2 for battery divider
+9,Capacitor 470-1000 uF (>= 10 V),1,Across servo red/brown to stop ESP32 resets
+10,Small mirror,1,Reflector placed beside the panel
+11,PCB (perfboard or stripboard),1,Soldered circuit board
+12,Female pin headers,1 set,For ESP32 and INA219 sockets
+13,Screw terminals or pin headers,1 set,LDRs / servo / panel / battery connectors
+14,Jumper wires and hook-up wire,1 set,
+15,Frame / base / mounting material,1 set,Cardboard or wood base + hot glue
+16,Cardboard divider (1-2 cm),1,Placed between the two LDRs
+17,USB data cable,1,Programming and power
+18,Soldering iron or gun + solder + multimeter,1 set,Tools
